@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: axis-bank-api
+    ports:
+      - "${API_PORT:-3000}:3000"
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - axis-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: axis-bank-db
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - axis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  axis-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
