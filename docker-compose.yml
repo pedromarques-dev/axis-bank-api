@@ -2,16 +2,12 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: axis-bank-api
     ports:
-      - "${API_PORT:-3000}:3000"
-    environment:
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_NAME=${DATABASE_NAME}
+      - "${API_PORT:-3333}:3333"
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
